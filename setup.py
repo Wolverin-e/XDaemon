@@ -24,7 +24,9 @@ setup(
 			'xd=xdaemon.cli.main:main',
 		],
 	},
-	# install_requires=[],
+	install_requires=[
+		"docopt==0.6.2"
+	],
 	# extras_require={
 	# 	'dev': [],
 	# 	'test': [],
