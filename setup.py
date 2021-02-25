@@ -25,7 +25,8 @@ setup(
 		],
 	},
 	install_requires=[
-		"docopt==0.6.2"
+		"docopt==0.6.2",
+		"PyYAML==5.4.1"
 	],
 	# extras_require={
 	# 	'dev': [],
