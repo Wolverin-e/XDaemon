@@ -2,6 +2,10 @@ import sys
 from docopt import docopt, DocoptExit
 from inspect import getdoc
 
+from .parser import YAMLJobParser
+from .executor import JobExecutor
+
+
 def main():
     execute_command()
 
@@ -65,9 +69,9 @@ class Command:
 
     @staticmethod
     def test(opts):
-        print("Executed: test")
-        print("Opts:", opts)
-        pass
+        job = YAMLJobParser.load(opts['-f'])
+        executor = JobExecutor(job=job)
+        executor.execute()
 
     @staticmethod
     def remove(opts):

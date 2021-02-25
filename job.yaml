@@ -1,0 +1,12 @@
+# Example-Backup-Job
+# execution will create a zip of resources
+
+name: Example-Backup
+schedule: 0 0 * * *
+backup:
+  - basedir: ./
+    resources:
+      - setup.py
+      - README.md
+      - xdaemon/cli
+    export: ./export-[timestamp].zip
