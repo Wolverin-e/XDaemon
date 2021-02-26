@@ -7,3 +7,6 @@ __pycache__
 .idea
 .vscode
 *.code-workspace
+
+# Info about jobs
+job_data.json
