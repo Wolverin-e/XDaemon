@@ -4,6 +4,16 @@ from inspect import getdoc
 
 from .parser import YAMLJobParser
 from .executor import JobExecutor
+from .cron import Cron
+from .lookup import (
+    generate_id,
+    get_id_from_name,
+    search_job_by_id,
+    search_job_by_name,
+    show_jobs,
+    store_job_by_id,
+    remove_job_by_id
+)
 
 
 def main():
@@ -57,30 +67,39 @@ class Command:
 
     @staticmethod
     def show(opts):
-        print("Executed: show")
-        print("Opts:", opts)
-        pass
+        show_jobs()
 
     @staticmethod
     def setup(opts):
-        print("Executed: setup")
-        print("Opts:", opts)
-        pass
+        job = YAMLJobParser.load(opts['-f'])
+        job_id = generate_id()
+        store_job_by_id(job_id, job)
+        Cron.setup(job_id, job.schedule)
 
     @staticmethod
     def test(opts):
         job = YAMLJobParser.load(opts['-f'])
-        executor = JobExecutor(job=job)
+        executor = JobExecutor(job)
         executor.execute()
 
     @staticmethod
     def remove(opts):
-        print("Executed: remove")
-        print("Opts:", opts)
-        pass
+        job_id = opts['--id'] or get_id_from_name(opts['--name'])
+
+        remove_job_by_id(job_id)
+        Cron.remove(job_id)
 
     @staticmethod
     def execute(opts):
-        print("Executed: execute")
-        print("Opts:", opts)
-        pass
+        job_id = opts['--id']
+        job_name = opts['--name']
+        file = None
+
+        if job_id:
+            file = search_job_by_id(job_id)['file']
+        else:
+            file = search_job_by_name(job_name)['file']
+
+        job = YAMLJobParser.load(file)
+        executor = JobExecutor(job)
+        executor.execute()

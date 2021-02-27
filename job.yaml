@@ -2,7 +2,7 @@
 # execution will create a zip of resources
 
 name: Example-Backup
-schedule: 0 0 * * *
+schedule: '* * * * *'
 backup:
   - basedir: ./
     resources:

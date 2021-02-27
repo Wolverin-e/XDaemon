@@ -33,9 +33,12 @@ class JobExecutor:
 
 		for backup_job in self.job.backup:
 
-			timestamp = datetime.now().strftime(r"%d-%m-%Y_%H-%M")
+			jobfile_parent = self.job.file.parent.resolve()
+
+			timestamp = datetime.now().strftime(r"%d-%m-%Y_%H-%M-%S")
 			export_file = backup_job['export'].replace(r'timestamp', timestamp)
-			base_dir = Path(backup_job['basedir'])
+			export_file = (jobfile_parent/export_file).resolve()
+			base_dir = (jobfile_parent/backup_job['basedir']).resolve()
 
 			with zipfile.ZipFile(export_file, 'w') as zipf:
 
