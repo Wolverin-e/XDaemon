@@ -9,18 +9,18 @@ CURRENT_USER = environ['USER']
 class Cron:
 
 	@staticmethod
-	def get_command(jobid):
+	def get_command(job_id):
 		xd = which('xd')
-		return f'{xd} execute --id {jobid}'
+		return f'{xd} execute --id {job_id}'
 
 	@classmethod
-	def setup(cls, jobid, schedule, user=CURRENT_USER):
+	def setup(cls, job_id, schedule, user=CURRENT_USER):
 		with CronTab(user) as tab:
-			tab.new(cls.get_command(jobid)) \
+			tab.new(cls.get_command(job_id)) \
 				.setall(schedule)
 
 	@classmethod
-	def remove(cls, jobid, user=CURRENT_USER):
+	def remove(cls, job_id, user=CURRENT_USER):
 		with CronTab(user) as tab:
-			for job in tab.find_command(cls.get_command(jobid)):
+			for job in tab.find_command(cls.get_command(job_id)):
 				job.delete()
