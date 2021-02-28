@@ -18,7 +18,8 @@ setup(
 	packages=find_packages(
 		include=('xdaemon*', )
 	),
-	python_requires='>=3, <4',
+	# >= 3.3 due to shutil.which in cron.py
+	python_requires='>=3.3, <4',
 	entry_points={
 		'console_scripts': [
 			'xd=xdaemon.cli.main:main',
@@ -26,7 +27,8 @@ setup(
 	},
 	install_requires=[
 		"docopt==0.6.2",
-		"PyYAML==5.4.1"
+		"PyYAML==5.4.1",
+		"python-crontab==2.5.1"
 	],
 	# extras_require={
 	# 	'dev': [],
