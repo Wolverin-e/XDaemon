@@ -1,8 +1,9 @@
 import json
 from json.decoder import JSONDecodeError
+import os
 from pathlib import Path
 
-from .exceptions import JobAlreadyExists
+from .exceptions import JobAlreadyExists, PermissionError
 from .job import Job
 
 
@@ -36,7 +37,8 @@ def store_job_by_id(job_id, job: Job):
     job_data.update({
         job_id: {
             'file': str(job.file),
-            'name': job.name
+            'name': job.name,
+            'user': os.environ['USER']
         },
         job.name: job_id
     })
@@ -71,16 +73,12 @@ def search_job_by_name(job_name):
 def remove_job_by_id(job_id):
     job_data = read_job_data()
     if job_id in job_data:
+
+        job_user = job_data[job_id]['user']
+        if os.environ['USER'] != job_user:
+            raise PermissionError(f"The Job was setup by: {job_user}")
+
         job_name = job_data[job_id]['name']
-        del job_data[job_name]
-        del job_data[job_id]
-    write_job_data(job_data)
-
-
-def remove_job_by_name(job_name):
-    job_data = read_job_data()
-    if job_name in job_data:
-        job_id = str(job_data[job_name])
         del job_data[job_name]
         del job_data[job_id]
     write_job_data(job_data)
@@ -92,4 +90,5 @@ def show_jobs():
         if type(job_data[key]) == int:
             continue
 
-        print(f'{key} : {job_data[key]["name"]} -> {job_data[key]["file"]}')
+        job = job_data[key]
+        print(f'{key} : {job["user"]} : {job["name"]} -> {job["file"]}')
