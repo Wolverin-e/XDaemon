@@ -18,14 +18,15 @@ jobs:
       with:
         python-version: 3.9
 
-    - name: Cache
+    - name: Cache Venv
+      id: cache-venv
       uses: actions/cache@v2.1.4
       with:
         path: ./venv
         key: PY-VERSION-${{ env.pythonLocation }}-SETUP-${{ hashFiles('setup.py') }}
 
     - name: Install dependencies
-      if: steps.cache.outputs.cache-hit != 'true'
+      if: steps.cache-venv.outputs.cache-hit != 'true'
       run: |
         python -m venv ./venv
         source ./venv/bin/activate
