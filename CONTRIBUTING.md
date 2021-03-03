@@ -24,7 +24,7 @@ $ python3 -m venv ./venv
 $ source venv/bin/activate
 
 # Install The Project
-$ pip install -e .
+$ pip install -e '.[dev]'
 
 # Test the installation by
 $ xd
@@ -46,6 +46,12 @@ $ git checkout -b <new-branch-name>
 ###   Do.Your.Magic   ###
 #########################
 
+
+# Before Commiting your code
+# For Checking PEP8 Violations:
+$ flake8 .
+# If any violations -> For auto-linting:
+$ autopep8 -i <file-to-lint>
 
 # Commit Your Code
 $ git add .

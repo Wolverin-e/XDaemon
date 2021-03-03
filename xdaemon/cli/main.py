@@ -19,6 +19,7 @@ from .lookup import (
 def main():
     execute_command()
 
+
 def execute_command():
     opts = get_opts(sys.argv[1:])
 
@@ -33,6 +34,7 @@ def execute_command():
     for command in commands:
         if opts[command]:
             getattr(Command, command)(opts)
+
 
 def get_opts(argv):
     doc_str = getdoc(Command)

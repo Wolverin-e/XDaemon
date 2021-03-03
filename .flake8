@@ -1,0 +1,6 @@
+[flake8]
+exclude = 
+	.git, 
+	__pycache__,
+	XDaemon.egg-info,
+	venv
