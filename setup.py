@@ -30,7 +30,8 @@ setup(
     install_requires=[
         "docopt==0.6.2",
         "PyYAML==5.4.1",
-        "python-crontab==2.5.1"
+        "python-crontab==2.5.1",
+        "coloredlogs==15.0"
     ],
     extras_require={
         'dev': [
