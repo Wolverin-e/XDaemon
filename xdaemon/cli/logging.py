@@ -31,6 +31,7 @@ level_styles = {
     'warning':          colors['yellow'],
     'error':            colors['red'],
     'critical':         colors['bold_red'],
+    'dev':              colors['bold_yellow']
 }
 
 DEV = 25
