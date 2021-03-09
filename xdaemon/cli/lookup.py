@@ -2,50 +2,79 @@ import json
 from json.decoder import JSONDecodeError
 import os
 from pathlib import Path
+from logging import getLogger
 
 from .exceptions import JobAlreadyExists, PermissionError
 from .job import Job
+from .utils import prettify
 
-
+logger = getLogger(__name__)
 FILE_DIR = Path(__file__).parent.resolve()
 DATASTORE = FILE_DIR/'job_data.json'
 
 
 def read_job_data():
+
+    logger.info("Reading the datastore.")
+
     try:
         with open(DATASTORE, "r") as jsondata:
-            return json.load(jsondata)
+            ds = json.load(jsondata)
+            logger.debug(f"Read: \n{prettify(ds)}")
+            return ds
     except (FileNotFoundError, JSONDecodeError):
+        logger.warning(f"{DATASTORE} missing")
         return {}
 
 
 def write_job_data(job_data):
+
+    logger.info("Writing to the Datastore.")
+    logger.debug(f"job_data: \n{prettify(job_data)}")
+
     with open(DATASTORE, "w") as write_json:
         json.dump(job_data, write_json)
 
 
 def generate_id():
+
     job_data = read_job_data()
-    return int(len(job_data)/2)
+    id = int(len(job_data)/2)
+
+    logger.debug(f"Generated id: {id}")
+
+    return id
 
 
 def store_job_by_id(job_id, job: Job):
+
+    logger.info("Storing the job.")
+    logger.debug(f"id: {id} \n job: {job_id}")
+
     job_data = read_job_data()
     if job.name in job_data:
         raise JobAlreadyExists(job.name)
 
-    job_data.update({
+    updates = {
         job_id: {
             'file': str(job.file),
             'name': job.name,
             'user': os.environ['USER']
         },
         job.name: job_id
-    })
+    }
+
+    logger.debug(f"updates: {prettify(updates)}")
+
+    job_data.update(updates)
     write_job_data(job_data)
 
 
 def search_job_by_id(job_id):
+
+    logger.info("Searching the job by id.")
+    logger.debug(f"id: {job_id}")
+
     job_data = read_job_data()
 
     if job_id in job_data:
@@ -61,6 +90,10 @@ def get_id_from_name(job_name):
 
 
 def search_job_by_name(job_name):
+
+    logger.info("Searching the job by name")
+    logger.debug(f"name: {job_name}")
+
     job_data = read_job_data()
 
     if job_name in job_data:
@@ -71,6 +104,10 @@ def search_job_by_name(job_name):
 
 
 def remove_job_by_id(job_id):
+
+    logger.info("Removing the job..")
+    logger.debug(f"id: {job_id}")
+
     job_data = read_job_data()
     if job_id in job_data:
 
