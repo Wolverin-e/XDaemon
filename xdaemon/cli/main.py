@@ -16,6 +16,7 @@ from .lookup import (
     remove_job_by_id
 )
 from .logging import setup_logging
+from .utils import prettify
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +51,7 @@ def execute_command(argv):
 
     opts = get_opts(argv, Command)
     setup_logging(opts)
-    logger.debug(f"opts: \n{opts}")
+    logger.debug(f"opts: \n{prettify(opts)}")
     command = opts["COMMAND"]
 
     if not command:
@@ -59,12 +60,13 @@ def execute_command(argv):
     if not hasattr(Command, command):
         raise SystemExit(f"command: {command} is not supported")
 
-    try:
-        command_function = getattr(Command, command)
-        cmd_opts = get_opts(opts['ARGS'], command_function)
-        logger.info(f'command-opts: {cmd_opts}')
+    command_function = getattr(Command, command)
+    cmd_opts = get_opts(opts['ARGS'], command_function)
 
-        logger.info(f'Executing command: {command}')
+    logger.info(f'Executing command: {command}')
+    logger.debug(f'command-opts: \n{prettify(cmd_opts)}')
+
+    try:
         command_function(cmd_opts)
     except Exception:
         logger.exception("An uncaught exception occured..")
@@ -106,8 +108,6 @@ class Command:
         Usage:
           show
         """
-
-        logger.dev("Dev Log")
 
         show_jobs()
 

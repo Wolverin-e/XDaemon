@@ -2,8 +2,11 @@ import os
 import zipfile
 from pathlib import Path
 from datetime import datetime
+from logging import getLogger
 
 from .job import Job
+
+logger = getLogger(__name__)
 
 
 def zipdir(path: Path, zipf: zipfile.ZipFile):
@@ -30,6 +33,7 @@ class JobExecutor:
     def execute(self):
         # For now the by default job is backup
         # Just zipping
+        logger.info("Executing the job")
 
         for backup_job in self.job.backup:
 
@@ -46,6 +50,7 @@ class JobExecutor:
                     res = base_dir/res
 
                     if not res.exists():
+                        logger.warning(f"zipping: {res} doesn't exist.")
                         continue
 
                     if res.is_dir():
