@@ -1,6 +1,6 @@
 import os
-from azure.storage.blob import BlobServiceClient, BlobClient
-from azure.storage.blob import ContentSettings, ContainerClient
+from azure.storage.blob import BlobServiceClient
+from azure.storage.blob import ContentSettings
 MY_CONNECTION_STRING = ""
 MY_FILE_CONTAINER = ""
 LOCAL_FILE_PATH = ""
@@ -58,6 +58,7 @@ class AzureStorage(IStorage):
         for file in files:
             print(f'Deleting {file}')
             self.client.delete_blob(file)
+
 
 A = AzureStorage()
 A.set_creds(MY_CONNECTION_STRING, MY_FILE_CONTAINER)
