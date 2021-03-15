@@ -10,3 +10,6 @@ __pycache__
 
 # Info about jobs
 job_data.json
+
+# Testing Exports
+export-*

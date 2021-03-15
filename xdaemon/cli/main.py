@@ -6,15 +6,7 @@ import logging
 from .parser import YAMLJobParser
 from .executor import JobExecutor
 from .cron import Cron
-from .lookup import (
-    generate_id,
-    get_id_from_name,
-    search_job_by_id,
-    search_job_by_name,
-    show_jobs,
-    store_job_by_id,
-    remove_job_by_id
-)
+from .lookup import JSONDataStore as DataStore
 from .logging import setup_logging
 from .utils import prettify
 
@@ -109,7 +101,7 @@ class Command:
           show
         """
 
-        show_jobs()
+        DataStore.show_jobs()
 
     @staticmethod
     def setup(opts):
@@ -125,8 +117,8 @@ class Command:
         """
 
         job = YAMLJobParser.load(opts['-f'])
-        job_id = generate_id()
-        store_job_by_id(job_id, job)
+        job_id = DataStore.generate_id()
+        DataStore.store_job_by_id(job_id, job)
         Cron.setup(job_id, job.schedule)
 
     @staticmethod
@@ -159,9 +151,9 @@ class Command:
           --id <id>                         ID of the Job.
         """
 
-        job_id = opts['--id'] or get_id_from_name(opts['--name'])
+        job_id = opts['--id'] or DataStore.get_id_from_name(opts['--name'])
 
-        remove_job_by_id(job_id)
+        DataStore.remove_job_by_id(job_id)
         Cron.remove(job_id)
 
     @staticmethod
@@ -182,9 +174,9 @@ class Command:
         file = None
 
         if job_id:
-            file = search_job_by_id(job_id)['file']
+            file = DataStore.search_job_by_id(job_id)['file']
         else:
-            file = search_job_by_name(job_name)['file']
+            file = DataStore.search_job_by_name(job_name)['file']
 
         job = YAMLJobParser.load(file)
         executor = JobExecutor(job)
