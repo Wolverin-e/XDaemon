@@ -16,7 +16,7 @@ class Cron:
     def get_command(job_id):
         xd = which('xd')
         cmd = f'{xd} execute --id {job_id}'
-        logger.debug(f'cron commnad: f{cmd}')
+        logger.debug(f'cron commnad: {cmd}')
         return cmd
 
     @classmethod

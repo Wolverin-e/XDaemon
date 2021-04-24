@@ -3,6 +3,7 @@ from json.decoder import JSONDecodeError
 import os
 from pathlib import Path
 from logging import getLogger
+from enum import Enum
 
 from .exceptions import JobAlreadyExists, PermissionError
 from .job import Job
@@ -13,119 +14,162 @@ FILE_DIR = Path(__file__).parent.resolve()
 DATASTORE = FILE_DIR/'job_data.json'
 
 
-def read_job_data():
-
-    logger.info("Reading the datastore.")
-
-    try:
-        with open(DATASTORE, "r") as jsondata:
-            ds = json.load(jsondata)
-            logger.debug(f"Read: \n{prettify(ds)}")
-            return ds
-    except (FileNotFoundError, JSONDecodeError):
-        logger.warning(f"{DATASTORE} missing")
-        return {}
+class Keys(str, Enum):
+    jobs = "jobs"
+    names = "names"
+    enabled = "enabled"
+    file = "file"
+    name = "name"
+    user = "user"
 
 
-def write_job_data(job_data):
+class JSONDataStore():
+    """
+        Responsible for interaction with a JSON-File datastore.
+    """
 
-    logger.info("Writing to the Datastore.")
-    logger.debug(f"job_data: \n{prettify(job_data)}")
+    @staticmethod
+    def read_job_data():
 
-    with open(DATASTORE, "w") as write_json:
-        json.dump(job_data, write_json)
+        logger.info("Reading the datastore.")
 
+        try:
+            with open(DATASTORE, "r") as jsondata:
+                ds = json.load(jsondata)
+                logger.debug(f"Read: \n{prettify(ds)}")
+                return ds
+        except (FileNotFoundError, JSONDecodeError):
+            logger.warning(f"{DATASTORE} missing")
+            return {
+                Keys.jobs: {},
+                Keys.names: {},
+                Keys.enabled: []
+            }
 
-def generate_id():
+    @staticmethod
+    def write_job_data(job_data):
 
-    job_data = read_job_data()
-    id = int(len(job_data)/2)
+        logger.info("Writing to the Datastore.")
+        logger.debug(f"job_data: \n{prettify(job_data)}")
 
-    logger.debug(f"Generated id: {id}")
+        with open(DATASTORE, "w") as write_json:
+            json.dump(job_data, write_json)
 
-    return id
+    @classmethod
+    def generate_id(cls):
 
+        job_data = cls.read_job_data()
+        id = len(job_data[Keys.jobs])
 
-def store_job_by_id(job_id, job: Job):
+        logger.debug(f"Generated id: {id}")
 
-    logger.info("Storing the job.")
-    logger.debug(f"id: {id} \n job: {job_id}")
+        return id
 
-    job_data = read_job_data()
-    if job.name in job_data:
-        raise JobAlreadyExists(job.name)
+    @classmethod
+    def store_job_by_id(cls, job_id, job: Job):
 
-    updates = {
-        job_id: {
-            'file': str(job.file),
-            'name': job.name,
-            'user': os.environ['USER']
-        },
-        job.name: job_id
-    }
+        logger.info("Storing the job.")
+        logger.debug(f"id: {job_id} \n job: {job.name}")
 
-    logger.debug(f"updates: {prettify(updates)}")
+        job_data = cls.read_job_data()
+        if job.name in job_data[Keys.names]:
+            raise JobAlreadyExists(job.name)
 
-    job_data.update(updates)
-    write_job_data(job_data)
+        jobs_updates = {
+            job_id: {
+                Keys.file: str(job.file),
+                Keys.name: job.name,
+                Keys.user: os.environ['USER']
+            }
+        }
 
+        names_update = {
+            job.name: job_id
+        }
 
-def search_job_by_id(job_id):
+        logger.debug(f"updates: \njobs:{prettify(jobs_updates)} \n\
+                       names:{prettify(names_update)}")
 
-    logger.info("Searching the job by id.")
-    logger.debug(f"id: {job_id}")
+        job_data[Keys.names].update(names_update)
+        job_data[Keys.jobs].update(jobs_updates)
+        job_data[Keys.enabled].append(job_id)
 
-    job_data = read_job_data()
+        cls.write_job_data(job_data)
 
-    if job_id in job_data:
-        return job_data[job_id]
-    else:
-        return None
+    @classmethod
+    def search_job_by_id(cls, job_id):
 
+        job_id = str(job_id)  # Necessary for JSON Keys
 
-def get_id_from_name(job_name):
-    job_data = read_job_data()
-    if job_name in job_data:
-        return str(job_data[job_name])
+        logger.info("Searching the job by id.")
+        logger.debug(f"id: {job_id}")
 
+        job_data = cls.read_job_data()
 
-def search_job_by_name(job_name):
+        if job_id in job_data[Keys.jobs]:
+            return job_data[Keys.jobs][job_id]
+        else:
+            return None
 
-    logger.info("Searching the job by name")
-    logger.debug(f"name: {job_name}")
+    @classmethod
+    def get_id_from_name(cls, job_name):
+        job_data = cls.read_job_data()
+        if job_name in job_data[Keys.names]:
+            return str(job_data[job_name])
 
-    job_data = read_job_data()
+    @classmethod
+    def search_job_by_name(cls, job_name):
 
-    if job_name in job_data:
-        job_id = str(job_data[job_name])
-        return job_data[job_id]
-    else:
-        return None
+        logger.info("Searching the job by name")
+        logger.debug(f"name: {job_name}")
 
+        job_data = cls.read_job_data()
 
-def remove_job_by_id(job_id):
+        if job_name in job_data[Keys.names]:
+            job_id = str(job_data[Keys.names][job_name])
+            return job_data[Keys.jobs][job_id]
+        else:
+            return None
 
-    logger.info("Removing the job..")
-    logger.debug(f"id: {job_id}")
+    @classmethod
+    def remove_job_by_id(cls, job_id):
 
-    job_data = read_job_data()
-    if job_id in job_data:
+        job_id = str(job_id)  # Necessary for JSON Keys
 
-        job_user = job_data[job_id]['user']
-        if os.environ['USER'] != job_user:
-            raise PermissionError(f"The Job was setup by: {job_user}")
+        logger.info("Removing the job..")
+        logger.debug(f"id: {job_id}")
 
-        job_name = job_data[job_id]['name']
-        del job_data[job_name]
-        del job_data[job_id]
-    write_job_data(job_data)
+        job_data = cls.read_job_data()
+        if job_id in job_data[Keys.jobs]:
 
+            job_user = job_data[Keys.jobs][job_id][Keys.user]
+            if os.environ['USER'] != job_user:
+                raise PermissionError(f"The Job was setup by: {job_user}")
 
-def show_jobs():
-    job_data = read_job_data()
-    for key in job_data:
-        if type(job_data[key]) == int:
-            continue
+            job_name = job_data[Keys.jobs][job_id][Keys.name]
+            del job_data[Keys.names][job_name]
+            del job_data[Keys.jobs][job_id]
 
-        job = job_data[key]
-        print(f'{key} : {job["user"]} : {job["name"]} -> {job["file"]}')
+            # Type-Conversion Necessary for searching in a list of int
+            job_id = int(job_id)
+            if(job_id in job_data[Keys.enabled]):
+                job_data[Keys.enabled].remove(job_id)
+
+        cls.write_job_data(job_data)
+
+    @classmethod
+    def show_jobs(cls):
+
+        jobs = cls.read_job_data()
+        jobs = jobs[Keys.jobs]
+
+        for job_id in jobs:
+
+            job = jobs[job_id]
+
+            print('{} : {} : {} -> {}'.format(
+                job_id,
+                job[Keys.user],
+                job[Keys.name],
+                job[Keys.file]
+            ))
