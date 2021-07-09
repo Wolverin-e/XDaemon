@@ -31,7 +31,9 @@ setup(
         "docopt==0.6.2",
         "PyYAML==5.4.1",
         "python-crontab==2.5.1",
-        "coloredlogs==15.0"
+        "coloredlogs==15.0",
+        "jsonschema==3.2.0",
+        "azure-storage-blob==12.8.1"
     ],
     extras_require={
         'dev': [
