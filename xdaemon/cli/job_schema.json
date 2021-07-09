@@ -1,0 +1,66 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "job_schema.json",
+    "type": "object",
+    "properties": {
+        "name": {
+            "type": "string"
+        },
+        "schedule": {
+            "type": "string"
+        },
+        "execute": {
+            "type": "object",
+            "properties": {
+                "backup": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "basedir": {
+                                "type": "string"
+                            },
+                            "resources": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            },
+                            "export": {
+                                "type": "string"
+                            },
+                            "upload":{
+                                "type": "boolean"
+                            }
+                        }
+                    }
+                },
+                "run": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "exec": {
+                                "type": "string"
+                            },
+                            "upload_path": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "creds": {
+            "type": "object",
+            "properties": {
+                "connection_string": {
+                    "type": "string"
+                },
+                "container": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
