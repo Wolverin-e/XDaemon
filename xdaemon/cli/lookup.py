@@ -132,6 +132,36 @@ class JSONDataStore():
             return None
 
     @classmethod
+    def enable_job_by_id(cls, job_id):
+
+        job_id = int(job_id)
+
+        logger.info("Setting the job enabled..")
+        logger.debug(f"id: {job_id}")
+
+        job_data = cls.read_job_data()
+
+        if job_id not in job_data[Keys.enabled]:
+            job_data[Keys.enabled].append(job_id)
+
+        cls.write_job_data(job_data)
+
+    @classmethod
+    def disable_job_by_id(cls, job_id):
+
+        job_id = int(job_id)
+
+        logger.info("Setting the job disabled..")
+        logger.debug(f"id: {job_id}")
+
+        job_data = cls.read_job_data()
+
+        if job_id in job_data[Keys.enabled]:
+            job_data[Keys.enabled].remove(job_id)
+
+        cls.write_job_data(job_data)
+
+    @classmethod
     def remove_job_by_id(cls, job_id):
 
         job_id = str(job_id)  # Necessary for JSON Keys

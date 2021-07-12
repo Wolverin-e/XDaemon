@@ -9,6 +9,7 @@ from .cron import Cron
 from .lookup import JSONDataStore as DataStore
 from .local_logging import setup_logging
 from .utils import prettify
+from .showbiz import ShowBiz, Keys as ShowBizKeys
 
 logger = logging.getLogger(__name__)
 
@@ -84,12 +85,14 @@ class Command:
                                             Used in conjunction with logging enabled.
 
     Commands:
-      show                                  Show the jobs.
+      show [--active | --inactive]          Show the jobs.
       setup [-f <jobfile>]                  Setup a Job.
                                             [Default: ./job.yaml]
       test [-f <jobfile>]                   Test a Job File by executing it.
                                             [Default: ./job.yaml]
       remove (--name <name> | --id <id>)    Remove a job by name or id.
+      enable (--name <name> | --id <id>)    Enable a job by name or id.
+      disable (--name <name> | --id <id>)   Disable a job by name or id.
       execute (--name <name> | --id <id>)   Execute a job by name or id.
     """  # NOQA: E501
 
@@ -99,10 +102,18 @@ class Command:
         Show already setup jobs.
 
         Usage:
-          show
+          show [--active | --inactive]
+
+        Options:
+          --active                            Show only active jobs.
+          --inactive                          Show only inactive jobs.
         """
 
-        DataStore.show_jobs()
+        jobs_type = opts["--active"] and ShowBizKeys.active
+        jobs_type = jobs_type or (opts["--inactive"] and ShowBizKeys.inactive)
+        jobs_type = jobs_type or ShowBizKeys.all
+
+        ShowBiz.show_jobs(jobs_type=jobs_type)
 
     @staticmethod
     def setup(opts):
@@ -138,6 +149,42 @@ class Command:
         job = YAMLJobParser.load(opts['-f'])
         executor = JobExecutor(job)
         executor.execute()
+
+    @staticmethod
+    def enable(opts):
+        """
+        Enable a disabled job.
+
+        Usage:
+          enable (--name <name> | --id <id>)
+
+        Options:
+          --name <name>                     Name of the Job.
+          --id <id>                         ID of the Job.
+        """
+
+        job_id = opts['--id'] or DataStore.get_id_from_name(opts['--name'])
+
+        DataStore.enable_job_by_id(job_id)
+        Cron.enable(job_id)
+
+    @staticmethod
+    def disable(opts):
+        """
+        Disable an enabled job.
+
+        Usage:
+          disable (--name <name> | --id <id>)
+
+        Options:
+          --name <name>                     Name of the Job.
+          --id <id>                         ID of the Job.
+        """
+
+        job_id = opts['--id'] or DataStore.get_id_from_name(opts['--name'])
+
+        DataStore.disable_job_by_id(job_id)
+        Cron.disable(job_id)
 
     @staticmethod
     def remove(opts):

@@ -34,6 +34,34 @@ class Cron:
         logger.info("Setup Successfully")
 
     @classmethod
+    def enable(cls, job_id, user=None):
+
+        user = user or cls.get_current_user()
+
+        logger.info("Enabling the Job.")
+        logger.debug(f'job-details: {job_id}, {user}')
+
+        with CronTab(user) as tab:
+            for job in tab.find_command(cls.get_command(job_id)):
+                job.enable()
+
+        logger.info("Enabled successfully")
+
+    @classmethod
+    def disable(cls, job_id, user=None):
+
+        user = user or cls.get_current_user()
+
+        logger.info("Disabling the Job.")
+        logger.debug(f'job-details: {job_id}, {user}')
+
+        with CronTab(user) as tab:
+            for job in tab.find_command(cls.get_command(job_id)):
+                job.enable(False)
+
+        logger.info("Disabled successfully")
+
+    @classmethod
     def remove(cls, job_id, user=None):
 
         user = user or cls.get_current_user()
