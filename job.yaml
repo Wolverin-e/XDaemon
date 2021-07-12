@@ -3,10 +3,23 @@
 
 name: Example-Backup
 schedule: '* * * * *'
-backup:
-  - basedir: ./
-    resources:
-      - setup.py
-      - README.md
-      - xdaemon/cli
-    export: ./export-[timestamp].zip
+
+execute:
+
+  backup:
+    - basedir: ./
+      resources:
+        - setup.py
+        - README.md
+        - xdaemon/cli
+      export: ./export-[timestamp].zip
+      upload: True
+
+  run:
+    - exec: echo "I am gonna be uploaded!" >> ./upload.txt
+      upload_path: './upload.txt'
+    - exec: rm -rf ./upload.txt ./export*.zip
+
+creds:
+  connection_string: <access-keys/connection-string>
+  container: <container-name>

@@ -7,7 +7,7 @@ from .parser import YAMLJobParser
 from .executor import JobExecutor
 from .cron import Cron
 from .lookup import JSONDataStore as DataStore
-from .logging import setup_logging
+from .local_logging import setup_logging
 from .utils import prettify
 
 logger = logging.getLogger(__name__)
@@ -62,6 +62,7 @@ def execute_command(argv):
         command_function(cmd_opts)
     except Exception:
         logger.exception("An uncaught exception occured..")
+        exit(1)
 
 
 class Command:

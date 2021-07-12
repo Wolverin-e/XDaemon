@@ -4,6 +4,7 @@ from logging import getLogger
 
 from .job import Job
 from .utils import prettify
+from .validator import validate_job
 
 logger = getLogger(__name__)
 
@@ -28,9 +29,13 @@ class YAMLJobParser:
         job_dict = cls.get_job_dict(file_path)
         logger.debug(f"Loaded: \n{prettify(job_dict)}")
 
-        return Job(
+        job = Job(
             file=get_abs_path(file_path),
             name=job_dict['name'],
             schedule=job_dict['schedule'],
-            backup=job_dict['backup']
+            job_dict=job_dict
         )
+
+        validate_job(job=job)
+
+        return job
