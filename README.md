@@ -6,4 +6,5 @@
 XDaemon is an automation tool.
 
 ## README 
-Coming Soon..
+- Coming Soon..
+- [Project Notion Page](https://cooperative-string-818.notion.site/XDaemon-532da9f667294484810bbc55667dc0a4)
